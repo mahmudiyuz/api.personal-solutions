@@ -33,7 +33,7 @@ app.post("/create", async (req, res) => {
   ];
   const query = `
     INSERT INTO vacancies (name, salary, adress, conditions, responsibility, requirements)
-    VALUES (&1, &2, &3, &4, &5, &6)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *;
   `;
 
@@ -55,7 +55,8 @@ app.delete("/delete/:id", async (req, res) => {
     `
       UPDATE vacancies
       SET state = 0
-      WHERE id = $1;
+      WHERE id = $1
+      RETURNING *;
     `,
     values
   );
