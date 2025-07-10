@@ -61,6 +61,10 @@ app.delete("/delete/:id", async (req, res) => {
     values
   );
 
+  if (result.rowCount === 0) {
+    return res.status(404).json({ message: "Data not found." });
+  }
+
   res.status(200).json({ message: "Data is deleted.", data: result.rows[0] });
 });
 
