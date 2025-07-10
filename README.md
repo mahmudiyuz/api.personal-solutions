@@ -1,3 +1,7 @@
 # Vacancies API
 
-GET /vacancies → returns list of job postings.
+GET /list → returns list of vacancies.
+
+POST /create → create vacancy.
+
+DELETE /delete → delete vacancy.

@@ -17,7 +17,7 @@ app.get("/list", async (req, res) => {
     );
     res.json({ data: rows });
   } catch (err) {
-    res.status(500).json({ error: err });
+    res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
 
@@ -41,9 +41,9 @@ app.post("/create", async (req, res) => {
   try {
     const result = await pool.query(query, values);
 
-    res.status(201).json({ data: result.rows[0] });
+    res.status(201).json({ message: "Data is created.", data: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ error: err });
+    res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
 
@@ -59,6 +59,8 @@ app.delete("/delete/:id", async (req, res) => {
     `,
     values
   );
+
+  res.status(200).json({ message: "Data is deleted.", data: result.rows[0] });
 });
 
 const PORT = process.env.PORT || 3000;
