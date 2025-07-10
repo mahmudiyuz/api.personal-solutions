@@ -1,11 +1,16 @@
-require("dotenv").config();
 const express = require("express");
-const db = require("./db");
+
 const app = express();
+
+require("dotenv").config();
+
+const { Pool } = require("pg");
+
+const pool = new Pool();
 
 app.get("/vacancies", async (req, res) => {
   try {
-    const { rows } = await db.query("SELECT * FROM vacancies");
+    const { rows } = await pool.query("SELECT * FROM vacancies");
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err });
