@@ -1,15 +1,13 @@
 const express = require("express");
+const { Pool } = require("pg");
 
 const app = express();
-
 app.use(express.json());
-
 require("dotenv").config();
-
-const { Pool } = require("pg");
 
 const pool = new Pool();
 
+// list
 app.get("/list", async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -21,6 +19,7 @@ app.get("/list", async (req, res) => {
   }
 });
 
+// create
 app.post("/create", async (req, res) => {
   const { name, salary, adress, conditions, responsibility, requirements } =
     req.body;
@@ -47,6 +46,7 @@ app.post("/create", async (req, res) => {
   }
 });
 
+// delete
 app.delete("/delete/:id", async (req, res) => {
   const id = req.params.id;
   const values = [id];
