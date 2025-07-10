@@ -12,7 +12,9 @@ const pool = new Pool();
 
 app.get("/list", async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM vacancies");
+    const { rows } = await pool.query(
+      "SELECT * FROM vacancies WHERE state = 1;"
+    );
     res.json({ data: rows });
   } catch (err) {
     res.status(500).json({ error: err });
@@ -43,6 +45,20 @@ app.post("/create", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err });
   }
+});
+
+app.delete("/delete/:id", async (req, res) => {
+  const id = req.params.id;
+  const values = [id];
+
+  const result = await pool.query(
+    `
+      UPDATE vacancies
+      SET state = 0
+      WHERE id = $1;
+    `,
+    values
+  );
 });
 
 const PORT = process.env.PORT || 3000;
