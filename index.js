@@ -1,14 +1,21 @@
 const express = require("express");
+const cors = require("cors");
 const { Pool } = require("pg");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
+// {
+//   origin: "https://mydomain.com",
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+//   allowedHeaders: ["Content-Type"],
+// }
 
 require("dotenv").config();
 
 const pool = new Pool();
 
-// list
+// get list
 app.get("/list", async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -32,14 +39,20 @@ app.post("/create", async (req, res) => {
     responsibility,
     requirements,
   ];
-  const query = `
-    INSERT INTO vacancies (name, salary, adress, conditions, responsibility, requirements)
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING *;
-  `;
+
+  if (values.includes(null)) {
+    return res.status(400).json({ message: "All fields required" });
+  }
 
   try {
-    const result = await pool.query(query, values);
+    const result = await pool.query(
+      `
+        INSERT INTO vacancies (name, salary, adress, conditions, responsibility, requirements)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *;
+      `,
+      values
+    );
 
     res.status(201).json({ message: "Data is created.", data: result.rows[0] });
   } catch (err) {
@@ -61,6 +74,10 @@ app.put("/update/:id", async (req, res) => {
     responsibility,
     requirements,
   ];
+
+  if (values.includes(null)) {
+    return res.status(400).json({ message: "All fields required" });
+  }
 
   try {
     const result = await pool.query(
