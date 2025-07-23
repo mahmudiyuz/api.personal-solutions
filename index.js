@@ -3,17 +3,21 @@ const cors = require("cors");
 const multer = require("multer");
 const { Pool } = require("pg");
 const { createClient } = require("@supabase/supabase-js");
+
 require("dotenv").config();
 
 const app = express();
+app.use(cors());
+app.use(express.json());
+
 const upload = multer();
+
 const pool = new Pool();
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY
 );
-
-app.use(cors());
 
 // create vacancy
 app.post("/create", upload.single("image"), async (req, res) => {
