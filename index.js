@@ -15,7 +15,7 @@ const supabase = createClient(
 
 app.use(cors());
 
-// create
+// create vacancy
 app.post("/create", upload.single("image"), async (req, res) => {
   try {
     const {
@@ -41,6 +41,7 @@ app.post("/create", upload.single("image"), async (req, res) => {
     }
 
     let imageUrl = null;
+
     if (req.file) {
       const fileName = Date.now() + "_" + req.file.originalname;
 
@@ -83,13 +84,11 @@ app.post("/create", upload.single("image"), async (req, res) => {
 
     res.status(201).json({ message: "Data created", data: result.rows[0] });
   } catch (error) {
-    console.log(error);
-
     res.status(500).json({ message: "Internal server error", error });
   }
 });
 
-// update
+// update vacancy
 app.put("/update/:id", upload.single("image"), async (req, res) => {
   try {
     const id = req.params.id;
@@ -128,7 +127,7 @@ app.put("/update/:id", upload.single("image"), async (req, res) => {
       imageUrl = urlData.publicUrl;
     }
 
-    const result = await pool.query(
+    const { rowCount, rows } = await pool.query(
       `
         UPDATE vacancies
         SET name = $2,
@@ -153,49 +152,96 @@ app.put("/update/:id", upload.single("image"), async (req, res) => {
       ]
     );
 
-    if (result.rowCount === 0) {
+    if (rowCount === 0) {
       return res.status(404).json({ message: "Not found or inactive" });
     }
 
-    res.json({ message: "Data updated", data: result.rows[0] });
+    res.json({ message: "Data updated", data: rows[0] });
   } catch (error) {
     res.status(500).json({ message: "Internal error", error });
   }
 });
 
-// list
+// list vacancy
 app.get("/list", async (req, res) => {
   try {
     const { rows } = await pool.query(
       "SELECT * FROM vacancies WHERE state = 1;"
     );
+
     res.json({ data: rows });
   } catch (error) {
-    res.status(500).json({ message: "Internal error", error });
+    res.status(500).json({ message: "Internal server error", error });
   }
 });
 
-// delete
+// delete vacancy
 app.delete("/delete/:id", async (req, res) => {
   try {
-    const result = await pool.query(
-      `UPDATE vacancies SET state = 0 WHERE id = $1 RETURNING *`,
+    const { rowCount, rows } = await pool.query(
+      `
+       UPDATE vacancies 
+       SET state = 0 
+       WHERE id = $1 
+       RETURNING *
+      `,
       [req.params.id]
     );
 
-    if (result.rowCount === 0) {
+    if (rowCount === 0) {
       return res.status(404).json({ message: "Not found" });
     }
 
-    res.json({ message: "Deleted", data: result.rows[0] });
+    res.json({ message: "Data successfully deleted", data: rows[0] });
   } catch (error) {
-    res.status(500).json({ message: "Internal error", error });
+    res.status(500).json({ message: "Internal server error", error });
   }
 });
 
+// create user
+app.post("/create-user", async (req, res) => {
+  try {
+    const { name, number, vacancy, cityzenship } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "name is required" });
+    }
+
+    const { rows } = await pool.query(
+      `
+        insert into users (name, number, vacancy, cityzenship)
+        values ($1, $2, $3, $4)
+        returning *;
+      `,
+      [name, number, vacancy, cityzenship]
+    );
+
+    res
+      .status(201)
+      .json({ message: "Data successfully created", data: rows[0] });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error });
+  }
+});
+
+// list users
+app.get("/list-users", async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      select * from users
+    `);
+
+    res.json({ data: rows });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error });
+  }
+});
+
+// not found middleware
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+// listen
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on", PORT));
