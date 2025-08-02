@@ -3,7 +3,6 @@ const cors = require("cors");
 const multer = require("multer");
 const { Pool } = require("pg");
 const { createClient } = require("@supabase/supabase-js");
-const vacanciesRoutes = require("./routes/vacancies.routes");
 
 require("dotenv").config();
 
@@ -11,9 +10,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-// Routes
-app.use("api/vacancies", vacanciesRoutes);
 
 const upload = multer();
 
